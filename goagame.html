@@ -206,7 +206,6 @@
 </body>
 </html>
 <script>
-  
   document.addEventListener('DOMContentLoaded', function() {
     const predictedNumberElement = document.getElementById('predictedNumber');
     const timerElement = document.getElementById('timeRemaining');
@@ -214,511 +213,176 @@
     const refreshButton = document.getElementById('refreshButton');
 
     let currentIssueNumber = null; // Variable to store the current issue number
+    let lastPredictionIssueNumber = null; // Variable to store the issue number for the last prediction
 
     const fetchNoAverageEmerdList = () => {
-        const requestData = {
-            pageSize: 10,
-            pageNo: 1,
-            typeId: 1,
-            language: 0,
-            random: "ded40537a2ce416e96c00e5218f6859a",
-            signature: "69306982EEEB19FA940D72EC93C62552",
-            timestamp: 1721383261
-        };
+      const requestData = {
+        pageSize: 10,
+        pageNo: 1,
+        typeId: 1,
+        language: 0,
+        random: "ded40537a2ce416e96c00e5218f6859a",
+        signature: "69306982EEEB19FA940D72EC93C62552",
+        timestamp: 1721383261
+      };
 
-        return fetch('https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Accept': 'application/json, text/plain, */*'
-            },
-            body: JSON.stringify(requestData)
+      return fetch('https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Accept': 'application/json, text/plain, */*'
+          },
+          body: JSON.stringify(requestData)
         })
         .then(response => response.json())
         .catch(error => console.error('Error fetching no average EMERD list data:', error));
     };
 
     const fetchGameIssue = () => {
-        const requestData = {
-            typeId: 1,
-            language: 0,
-            random: "e7fe6c090da2495ab8290dac551ef1ed",
-            signature: "1F390E2B2D8A55D693E57FD905AE73A7",
-            timestamp: 1723726679
-        };
+      const requestData = {
+        typeId: 1,
+        language: 0,
+        random: "e7fe6c090da2495ab8290dac551ef1ed",
+        signature: "1F390E2B2D8A55D693E57FD905AE73A7",
+        timestamp: 1723726679
+      };
 
-        return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Accept': 'application/json, text/plain, */*'
-            },
-            body: JSON.stringify(requestData)
+      return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Accept': 'application/json, text/plain, */*'
+          },
+          body: JSON.stringify(requestData)
         })
         .then(response => response.json())
         .catch(error => console.error('Error fetching game issue:', error));
     };
 
     const categorizeNumber = (number) => {
-        if (number >= 0 && number <= 4) {
-            return 'Small';
-        } else if (number >= 5 && number <= 9) {
-            return 'Big';
-        } else {
-            return 'Unknown';
-        }
+      if (number >= 0 && number <= 4) {
+        return 'Small';
+      } else if (number >= 5 && number <= 9) {
+        return 'Big';
+      } else {
+        return 'Unknown';
+      }
     };
 
     const predictNextNumber = (list) => {
-        if (list.length < 2) {
-            return { category: 'N/A' };
-        }
+      if (list.length < 2) {
+        return { category: 'N/A' };
+      }
 
-        const recentNumbers = list.slice(0, 5).map(item => Number(item.number));
-        if (recentNumbers.length < 2) return { category: 'N/A' };
+      const recentNumbers = list.slice(0, 5).map(item => Number(item.number));
+      if (recentNumbers.length < 2) return { category: 'N/A' };
 
-        const sum = recentNumbers.reduce((a, b) => a + b, 0);
-        const average = sum / recentNumbers.length;
-        const trend = recentNumbers.length >= 2 ? recentNumbers[0] - recentNumbers[1] : 0;
+      const sum = recentNumbers.reduce((a, b) => a + b, 0);
+      const average = sum / recentNumbers.length;
+      const trend = recentNumbers.length >= 2 ? recentNumbers[0] - recentNumbers[1] : 0;
 
-        // Introduce randomness to the predicted number
-        const randomOffset = Math.floor(Math.random() * 5) - 2; // Random number between -2 and 2
-        const predictedNumber = Math.round(average + trend + randomOffset);
-        
-        // Clamp the number between 0 and 9
-        const clampedNumber = Math.max(0, Math.min(9, predictedNumber));
-        const predictedCategory = categorizeNumber(clampedNumber);
+      // Introduce randomness to the predicted number
+      const randomOffset = Math.floor(Math.random() * 5) - 2; // Random number between -2 and 2
+      const predictedNumber = Math.round(average + trend + randomOffset);
 
-        return {
-            category: predictedCategory
-        };
+      // Clamp the number between 0 and 9
+      const clampedNumber = Math.max(0, Math.min(9, predictedNumber));
+      const predictedCategory = categorizeNumber(clampedNumber);
+
+      return {
+        category: predictedCategory
+      };
     };
 
     const updateDataAndPrediction = () => {
-        fetchNoAverageEmerdList()
-            .then(data => {
-                if (!data.data || !data.data.list || data.data.list.length === 0) {
-                    console.error('No data received for no average EMERD list.');
-                    return;
-                }
+      fetchNoAverageEmerdList()
+        .then(data => {
+          if (!data.data || !data.data.list || data.data.list.length === 0) {
+            console.error('No data received for no average EMERD list.');
+            return;
+          }
 
-                const list = data.data.list;
-                const prediction = predictNextNumber(list);
+          const list = data.data.list;
+          const newIssueNumber = list[0].issueNumber;
 
-                // Update prediction display
-                predictedNumberElement.textContent = `Bet on\n\n${prediction.category}`;
+          // Update issue number display
+          if (currentIssueNumber !== newIssueNumber) {
+            currentIssueNumber = newIssueNumber;
+            issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
 
-                // Get the current issue number (latest in the list)
-                const newIssueNumber = list[0].issueNumber;
+            // Update prediction if period number has changed
+            const prediction = predictNextNumber(list);
+            predictedNumberElement.textContent = `Bet on\n\n${prediction.category}`;
 
-                if (currentIssueNumber !== newIssueNumber) {
-                    currentIssueNumber = newIssueNumber;
-                    // Update issue number display
-                    issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
-                }
+            // Save the latest prediction to local storage
+            const lastPrediction = {
+              issueNumber: currentIssueNumber,
+              category: prediction.category
+            };
+            localStorage.setItem('lastPrediction', JSON.stringify(lastPrediction));
 
-                // Save the latest prediction to local storage
-                lastPrediction = {
-                    issueNumber: currentIssueNumber,
-                    category: prediction.category
-                };
-                localStorage.setItem('lastPrediction', JSON.stringify(lastPrediction));
-            })
-            .catch(error => console.error('Error fetching no average EMERD list data:', error));
-    };
-
-    const updateTimer = () => {
-        fetchGameIssue()
-            .then(data => {
-                if (!data.data) {
-                    console.error('No data received for game issue.');
-                    return;
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Include Google Font for styling -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
-    <style>
-        @keyframes rgbBorder {
-            0% { border-color: rgb(255, 0, 0); }
-            14% { border-color: rgb(255, 165, 0); }
-            28% { border-color: rgb(255, 255, 0); }
-            42% { border-color: rgb(0, 128, 0); }
-            57% { border-color: rgb(0, 255, 255); }
-            71% { border-color: rgb(0, 0, 255); }
-            85% { border-color: rgb(238, 130, 238); }
-            100% { border-color: rgb(255, 0, 0); }
-        }
-
-        body {
-            background-color: royalblue;
-            background-size: cover;
-            font-family: 'Noto Sans', sans-serif;
-            color: #0f0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            position: relative;
-        }
-
-        .container {
-            width: 250px;
-            height: 350px;
-            background-color: rgba(34, 34, 34, 2.8);
-            border: 8px solid #0f0;
-            padding: 10px;
-            padding-bottom: 60px;
-            border-radius: 50px;
-            box-shadow: 0 0 15px;
-            transition: border-color 1.3s, box-shadow 1.3s;
-            animation: rgbBorder 7s linear infinite;
-            z-index: 1;
-        }
-
-        .title, .timer, .period, .bet {
-            font-weight: bold;
-        }
-
-        .title {
-            font-size: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-            color: royalblue;
-        }
-
-        .timer {
-            font-size: 50px;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #fff;
-        }
-
-        .period {
-            font-size: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            color: royalblue;
-        }
-
-        .bet {
-            font-size: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #fff;
-        }
-
-        .button {
-            display: block;
-            padding: 0;
-            margin: 20px auto;
-            width: 150px;
-            height: 50px;
-            background-color: royalblue;
-            border: none;
-            color: #000;
-            font-size: 20px;
-            text-align: center;
-            text-decoration: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-weight: bold;
-            line-height: 50px;
-        }
-
-        .telegram-button {
-            display: block;
-            margin: 20px auto;
-            width: 150px;
-            height: 50px;
-            background-color: #0088cc;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            text-align: center;
-            text-decoration: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2;
-            display: none; /* Initially hidden */
-        }
-
-        .popup {
-            background-color: black;
-            padding: 20px;
-            border-radius: 10px;
-            border: 3px solid white;
-            text-align: center;
-            width: 300px;
-            height: 320px;
-        }
-
-        .popup .cancel-button {
-            display: none; /* Initially hidden */
-            background-color: red;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="title">GoaGame 1Min</div>
-    <div id="timeRemaining" class="timer">00:03</div>
-    <div id="issueNumber" class="period">Period: Loading</div>
-    <div id="predictedNumber" class="bet">Bet on<br><br>Loading</div>
-    <button id="refreshButton" class="button">Refresh</button>
-    <a href="https://t.me/Goa_Gamee_Link" class="telegram-button">Telegram</a>
-</div>
-
-<!-- Pop-up Structure -->
-<div class="overlay" id="popupOverlay">
-    <div class="popup">
-        <h1>Warning!</h1>
-        <h2>
-            Click the 'Register' button to create a new account. If you use this mod with your old account, it will not work.
-        </h2>
-        <a id="registerButton" class="button" href="https://goagames.link/#/register?invitationCode=176883812696" target="_blank">Register</a>
-        <button id="cancelButton" class="button cancel-button">Cancel</button>
-    </div>
-</div>
-
-<script>
-    const popupOverlay = document.getElementById("popupOverlay");
-    const registerButton = document.getElementById("registerButton");
-    const cancelButton = document.getElementById("cancelButton");
-
-    // Function to hide the popup after 1 minute
-    function hidePopup() {
-        setTimeout(function() {
-            popupOverlay.style.display = "none";
-        }, 60000); // 1 minute in milliseconds
-    }
-
-    // Function to start the timer and show the cancel button
-    function startTimer() {
-        setTimeout(function() {
-            cancelButton.style.display = "block";
-        }, 60000); // 1 minute in milliseconds
-    }
-
-    // Function to handle cancel button click
-    function handleCancel() {
-        popupOverlay.style.display = "none";
-    }
-
-    // Automatically display the popup when the page loads
-    window.onload = function() {
-        if (!localStorage.getItem("registered")) {
-            popupOverlay.style.display = "flex";
-            registerButton.addEventListener("click", function() {
-                localStorage.setItem("registered", "true");
-                startTimer(); // Start the timer when "Register" is clicked
-                hidePopup();  // Automatically hide popup after 1 minute
-            });
-            cancelButton.addEventListener("click", handleCancel);
-        }
-    };
-</script>
-
-</body>
-</html>
-<script>
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    const predictedNumberElement = document.getElementById('predictedNumber');
-    const timerElement = document.getElementById('timeRemaining');
-    const issueNumberElement = document.getElementById('issueNumber');
-    const refreshButton = document.getElementById('refreshButton');
-
-    let currentIssueNumber = null; // Variable to store the current issue number
-
-    const fetchNoAverageEmerdList = () => {
-        const requestData = {
-            pageSize: 10,
-            pageNo: 1,
-            typeId: 1,
-            language: 0,
-            random: "ded40537a2ce416e96c00e5218f6859a",
-            signature: "69306982EEEB19FA940D72EC93C62552",
-            timestamp: 1721383261
-        };
-
-        return fetch('https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Accept': 'application/json, text/plain, */*'
-            },
-            body: JSON.stringify(requestData)
+            lastPredictionIssueNumber = currentIssueNumber; // Update the last prediction issue number
+          }
         })
-        .then(response => response.json())
         .catch(error => console.error('Error fetching no average EMERD list data:', error));
     };
 
-    const fetchGameIssue = () => {
-        const requestData = {
-            typeId: 1,
-            language: 0,
-            random: "e7fe6c090da2495ab8290dac551ef1ed",
-            signature: "1F390E2B2D8A55D693E57FD905AE73A7",
-            timestamp: 1723726679
-        };
-
-        return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Accept': 'application/json, text/plain, */*'
-            },
-            body: JSON.stringify(requestData)
-        })
-        .then(response => response.json())
-        .catch(error => console.error('Error fetching game issue:', error));
-    };
-
-    const categorizeNumber = (number) => {
-        if (number >= 0 && number <= 4) {
-            return 'Small';
-        } else if (number >= 5 && number <= 9) {
-            return 'Big';
-        } else {
-            return 'Unknown';
-        }
-    };
-
-    const predictNextNumber = (list) => {
-        if (list.length < 2) {
-            return { category: 'N/A' };
-        }
-
-        const recentNumbers = list.slice(0, 5).map(item => Number(item.number));
-        if (recentNumbers.length < 2) return { category: 'N/A' };
-
-        const sum = recentNumbers.reduce((a, b) => a + b, 0);
-        const average = sum / recentNumbers.length;
-        const trend = recentNumbers.length >= 2 ? recentNumbers[0] - recentNumbers[1] : 0;
-
-        // Introduce randomness to the predicted number
-        const randomOffset = Math.floor(Math.random() * 5) - 2; // Random number between -2 and 2
-        const predictedNumber = Math.round(average + trend + randomOffset);
-        
-        // Clamp the number between 0 and 9
-        const clampedNumber = Math.max(0, Math.min(9, predictedNumber));
-        const predictedCategory = categorizeNumber(clampedNumber);
-
-        return {
-            category: predictedCategory
-        };
-    };
-
-    const updateDataAndPrediction = () => {
-        fetchNoAverageEmerdList()
-            .then(data => {
-                if (!data.data || !data.data.list || data.data.list.length === 0) {
-                    console.error('No data received for no average EMERD list.');
-                    return;
-                }
-
-                const list = data.data.list;
-                const prediction = predictNextNumber(list);
-
-                // Update prediction display
-                predictedNumberElement.textContent = `Bet on\n\n${prediction.category}`;
-
-                // Get the current issue number (latest in the list)
-                const newIssueNumber = list[0].issueNumber;
-
-                if (currentIssueNumber !== newIssueNumber) {
-                    currentIssueNumber = newIssueNumber;
-                    // Update issue number display
-                    issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
-                }
-
-                // Save the latest prediction to local storage
-                lastPrediction = {
-                    issueNumber: currentIssueNumber,
-                    category: prediction.category
-                };
-                localStorage.setItem('lastPrediction', JSON.stringify(lastPrediction));
-            })
-            .catch(error => console.error('Error fetching no average EMERD list data:', error));
-    };
-
     const updateTimer = () => {
-        fetchGameIssue()
-            .then(data => {
-                if (!data.data) {
-                    console.error('No data received for game issue.');
+      fetchGameIssue()
+        .then(data => {
+          if (!data.data) {
+            console.error('No data received for game issue.');
+            return;
+          }
+
+          const { endTime, intervalM, issueNumber } = data.data;
+          if (!endTime || !intervalM) {
+            console.error('Incomplete data received for game issue.');
+            return;
+          }
+
+          const endDate = new Date(endTime);
+          const now = new Date();
+          const remainingTimeMs = endDate - now;
+
+          if (remainingTimeMs <= 0) {
+            timerElement.textContent = "00:00";
+            clearInterval(timerInterval);
+
+            // Delay new issue number request by 3 seconds
+            setTimeout(() => {
+              updateDataAndPrediction(); // Fetch new data and predictions
+              fetchGameIssue()
+                .then(data => {
+                  if (!data.data) {
+                    console.error('No data received for new game issue.');
                     return;
-                }
+                  }
 
-                const { endTime, intervalM, issueNumber } = data.data;
-                if (!endTime || !intervalM) {
-                    console.error('Incomplete data received for game issue.');
-                    return;
-                }
+                  const newIssueNumber = data.data.issueNumber;
+                  if (currentIssueNumber !== newIssueNumber) {
+                    currentIssueNumber = newIssueNumber;
+                    issueNumberElement.textContent = `Period: ${newIssueNumber}`;
+                  }
+                })
+                .catch(error => console.error('Error fetching new game issue data:', error));
+            }, 3000);
 
-                const endDate = new Date(endTime);
-                const intervalMs = intervalM * 60 * 1000; // Convert minutes to milliseconds
-                const now = new Date();
-                const remainingTimeMs = endDate - now;
+            // Restart the timer
+            timerInterval = setInterval(updateTimer, 1000);
+          } else {
+            const minutes = String(Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            const seconds = String(Math.floor((remainingTimeMs % (1000 * 60)) / 1000)).padStart(2, '0');
+            timerElement.textContent = `${minutes}:${seconds}`;
+          }
 
-                if (remainingTimeMs <= 0) {
-                    timerElement.textContent = "00:00";
-                    clearInterval(timerInterval);
-
-                    // Delay new issue number request by 3 seconds
-                    setTimeout(() => {
-                        updateDataAndPrediction(); // Fetch new data and predictions
-                        fetchGameIssue()
-                            .then(data => {
-                                if (!data.data) {
-                                    console.error('No data received for new game issue.');
-                                    return;
-                                }
-
-                                const newIssueNumber = data.data.issueNumber;
-                                if (currentIssueNumber !== newIssueNumber) {
-                                    currentIssueNumber = newIssueNumber;
-                                    issueNumberElement.textContent = `Period: ${newIssueNumber}`;
-                                }
-                            })
-                            .catch(error => console.error('Error fetching new game issue data:', error));
-                    }, 3000);
-
-                    // Restart the timer
-                    timerInterval = setInterval(updateTimer, 1000);
-                } else {
-                    const minutes = String(Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-                    const seconds = String(Math.floor((remainingTimeMs % (1000 * 60)) / 1000)).padStart(2, '0');
-                    timerElement.textContent = `00:${minutes}:${seconds}`;
-                }
-
-                // Update issue number immediately
-                if (currentIssueNumber !== issueNumber) {
-                    currentIssueNumber = issueNumber;
-                    issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
-                }
-            })
-            .catch(error => console.error('Error fetching game issue:', error));
+          // Update issue number immediately
+          if (currentIssueNumber !== issueNumber) {
+            currentIssueNumber = issueNumber;
+            issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
+          }
+        })
+        .catch(error => console.error('Error fetching game issue:', error));
     };
 
     // Fetch initial data and start the timer
@@ -727,23 +391,23 @@
 
     // Add event listener to the refresh button
     refreshButton.addEventListener('click', () => {
-        updateDataAndPrediction(); // Fetch new data and predictions
-        fetchGameIssue()
-            .then(data => {
-                if (!data.data) {
-                    console.error('No data received for new game issue.');
-                    return;
-                }
+      updateDataAndPrediction(); // Fetch new data and predictions
+      fetchGameIssue()
+        .then(data => {
+          if (!data.data) {
+            console.error('No data received for new game issue.');
+            return;
+          }
 
-                const newIssueNumber = data.data.issueNumber;
-                if (currentIssueNumber !== newIssueNumber) {
-                    currentIssueNumber = newIssueNumber;
-                    issueNumberElement.textContent = `Period: ${newIssueNumber}`;
-                }
-            })
-            .catch(error => console.error('Error fetching new game issue data:', error));
+          const newIssueNumber = data.data.issueNumber;
+          if (currentIssueNumber !== newIssueNumber) {
+            currentIssueNumber = newIssueNumber;
+            issueNumberElement.textContent = `Period: ${newIssueNumber}`;
+          }
+        })
+        .catch(error => console.error('Error fetching new game issue data:', error));
     });
-});
+  });
 </script>
 </body>
-</html>
+    </html>
