@@ -15,17 +15,26 @@ body {
   overflow: hidden;
 }
 
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind the content */
+}
+
 .container {
   display: flex;
   flex-direction: column; /* Stacks elements vertically */
   align-items: center; /* Centers items horizontally */
   justify-content: center;
   text-align: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.0); /* Black transparent background */
   padding: 50px;
   border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  backdrop-filter: blur(8.5px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.0); /* Black shadow */
+  backdrop-filter: blur(0px);
   animation: fadeIn 1.5s ease;
 }
 
@@ -76,7 +85,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: spin 5s linear infinite, rgb-border-glow 10s linear infinite; /* Apply both animations */
+  animation: spin 5s linear infinite, rgb-border-glow 10s linear infinite;
   border: 5px solid;
   margin: 20px auto; /* Center horizontally */
 }
@@ -106,7 +115,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-
 }
 
 .btn {
@@ -121,8 +129,9 @@ body {
   transition: transform 0.3s;
   color: white;
   width: 200px;
-  margin: 1.5,px;
+  margin: 2px;
   text-decoration: none; /* Remove underline from links */
+  background-color: rgba(0, 0, 0, 0.4); /* Black transparent button */
 }
 
 .btn:hover {
@@ -131,22 +140,22 @@ body {
 
 /* Button Specific Styles */
 .instagram-btn {
-  background-color: #E1306C;
+  background-color: rgba(0, 0, 0, 0.4); /* Black transparent */
 }
 
 .telegram-btn {
-  background-color: #0088cc;
+  background-color: rgba(0, 0, 0, 0.4); /* Black transparent */
 }
 
 .register-btn {
-  background-color: #ff416c;
+  background-color: rgba(0, 0, 0, 0.4); /* Black transparent */
 }
 
 .goagame-btn {
-  background-color: #00c6ff;
+  background-color: rgba(0, 0, 0, 0.4); /* Black transparent */
 }
 
 .icon {
   margin-right: 10px;
   font-size: 20px;
-}
+  }
