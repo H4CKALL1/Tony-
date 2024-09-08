@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Include Google Font for styling -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
     <style>
         @keyframes rgbBorder {
@@ -32,27 +31,29 @@
         }
 
         canvas {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 0; /* Behind the content */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
 
         .container {
             width: 250px;
-            height: 350px;
-            background-color: rgba(34, 34, 34, 0.8); /* Adjusted opacity */
+            height: 350px; /* Adjust height to auto to accommodate dynamic content */
+            background-color: rgba(34, 34, 34, 0.8);
             border: 8px solid #0f0;
             padding: 10px;
-            padding-bottom: 60px;
+            padding-bottom: 80px; /* Increased padding to ensure space for loading text */
             border-radius: 50px;
             box-shadow: 0 0 15px;
             transition: border-color 1.3s, box-shadow 1.3s;
             animation: rgbBorder 7s linear infinite;
             position: relative;
-            z-index: 1; /* Above the canvas */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .title, .timer, .period, .bet {
@@ -83,7 +84,13 @@
         .bet {
             font-size: 30px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px; /* Reduced margin to fit below the bet text */
+            color: #fff;
+        }
+
+        .loading {
+            font-size: 1.0rem;
+            margin-top: 0px; /* Adjust to ensure it's directly below the bet text */
             color: #fff;
         }
 
@@ -107,7 +114,7 @@
 
         .telegram-button {
             display: block;
-            margin: 20px auto;
+            margin: 0px;
             width: 150px;
             height: 50px;
             background-color: #0088cc;
@@ -132,7 +139,7 @@
             justify-content: center;
             align-items: center;
             z-index: 2;
-            display: none; /* Initially hidden */
+            display: none;
         }
 
         .popup {
@@ -147,32 +154,28 @@
         }
 
         .popup .cancel-button {
-            display: none; /* Initially hidden */
+            display: none;
             background-color: red;
             color: white;
         }
     </style>
 </head>
 <body>
-    <!-- Canvas for particles background -->
     <canvas id="particleCanvas"></canvas>
-
     <div class="container">
         <div class="title">GoaGame 1Min</div>
         <div id="timeRemaining" class="timer">00:03</div>
         <div id="issueNumber" class="period">Period: Loading</div>
         <div id="predictedNumber" class="bet">Bet on<br><br>Loading</div>
+        <div id="loading" class="loading">Loading...</div>
         <button id="refreshButton" class="button">Refresh</button>
         <a href="https://t.me/Goa_Gamee_Link" class="telegram-button">Telegram</a>
     </div>
 
-    <!-- Pop-up Structure -->
     <div class="overlay" id="popupOverlay">
         <div class="popup">
             <h1>Warning!</h1>
-            <h2>
-                Click the 'Register' button to create a new account. If you use this mod with your old account, it will not work.
-            </h2>
+            <h2>Click the 'Register' button to create a new account. If you use this mod with your old account, it will not work.</h2>
             <a id="registerButton" class="button" href="https://goagames.link/#/register?invitationCode=176883812696" target="_blank">Register</a>
             <button id="cancelButton" class="button cancel-button">Cancel</button>
         </div>
@@ -219,144 +222,143 @@
   };
 </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const predictedNumberElement = document.getElementById('predictedNumber');
-        const timerElement = document.getElementById('timeRemaining');
-        const issueNumberElement = document.getElementById('issueNumber');
-        const refreshButton = document.getElementById('refreshButton');
+    <script>
+                document.addEventListener('DOMContentLoaded', function() {
+            const predictedNumberElement = document.getElementById('predictedNumber');
+            const timerElement = document.getElementById('timeRemaining');
+            const issueNumberElement = document.getElementById('issueNumber');
+            const refreshButton = document.getElementById('refreshButton');
+            const loadingElement = document.getElementById('loading');
 
-        let currentIssueNumber = null;
+            let currentIssueNumber = null;
+            let timerInterval = null;
 
-        // Fetch data from API
-        const fetchGameIssue = () => {
-            const requestData = {
-                typeId: 1,
-                language: 0,
-                random: "e7fe6c090da2495ab8290dac551ef1ed",
-                signature: "1F390E2B2D8A55D693E57FD905AE73A7",
-                timestamp: 1723726679
+            const fetchGameIssue = () => {
+                const requestData = {
+                    typeId: 1,
+                    language: 0,
+                    random: "e7fe6c090da2495ab8290dac551ef1ed",
+                    signature: "1F390E2B2D8A55D693E57FD905AE73A7",
+                    timestamp: 1723726679
+                };
+
+                return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=UTF-8',
+                        'Accept': 'application/json, text/plain, */*'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .catch(error => console.error('Error fetching game issue:', error));
             };
 
-            return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json;charset=UTF-8',
-                    'Accept': 'application/json, text/plain, */*'
-                },
-                body: JSON.stringify(requestData)
-            })
-            .then(response => response.json())
-            .catch(error => console.error('Error fetching game issue:', error));
-        };
+            const predictNextNumber = () => {
+                return Math.random() < 0.5 ? 'Small' : 'Big';
+            };
 
-        // Randomly return 'Big' or 'Small'
-        const predictNextNumber = () => {
-            return Math.random() < 0.5 ? 'Small' : 'Big';
-        };
-
-        const updatePrediction = (newIssueNumber) => {
-            if (currentIssueNumber !== newIssueNumber) {
-                currentIssueNumber = newIssueNumber;
-                issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
-
-                // Update prediction only when a new period arrives
-                const prediction = predictNextNumber();
-                predictedNumberElement.textContent = `Bet on\n\n${prediction}`;
-
-                const lastPrediction = {
-                    issueNumber: currentIssueNumber,
-                    category: prediction
-                };
-                localStorage.setItem('lastPrediction', JSON.stringify(lastPrediction));
-            }
-        };
-
-        const updateTimer = () => {
-            fetchGameIssue()
-            .then(data => {
-                if (!data.data) {
-                    console.error('No data received for game issue.');
-                    return;
-                }
-
-                const { endTime, intervalM, issueNumber } = data.data;
-                if (!endTime || !intervalM) {
-                    console.error('Incomplete data received for game issue.');
-                    return;
-                }
-
-                const endDate = new Date(endTime);
-                const now = new Date();
-                const remainingTimeMs = endDate - now;
-
-                if (remainingTimeMs <= 0) {
-                    timerElement.textContent = "00:00";
-                    clearInterval(timerInterval);
-
-                    // Fetch new data and predictions after 3 seconds
-                    setTimeout(() => {
-                        fetchGameIssue().then(data => {
-                            if (!data.data) {
-                                console.error('No data received for new game issue.');
-                                return;
-                            }
-
-                            const newIssueNumber = data.data.issueNumber;
-                            updatePrediction(newIssueNumber); // Update prediction and issue number
-                        });
-                        timerInterval = setInterval(updateTimer, 1000);
-                    }, 3000);
-
-                } else {
-                    const minutes = String(Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-                    const seconds = String(Math.floor((remainingTimeMs % (1000 * 60)) / 1000)).padStart(2, '0');
-                    timerElement.textContent = `${minutes}:${seconds}`;
-                }
-
-                if (currentIssueNumber !== issueNumber) {
-                    currentIssueNumber = issueNumber;
+            const updatePrediction = (newIssueNumber) => {
+                if (currentIssueNumber !== newIssueNumber) {
+                    currentIssueNumber = newIssueNumber;
                     issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
+
+                    loadingElement.style.display = 'block';
+
+                    setTimeout(() => {
+                        const prediction = predictNextNumber();
+                        predictedNumberElement.textContent = `Bet on\n\n${prediction}`;
+
+                        loadingElement.style.display = 'none';
+
+                        const lastPrediction = {
+                            issueNumber: currentIssueNumber,
+                            category: prediction
+                        };
+                        localStorage.setItem('lastPrediction', JSON.stringify(lastPrediction));
+                    }, 2000);
                 }
-            })
-            .catch(error => console.error('Error fetching game issue:', error));
-        };
+            };
 
-        // Fetch initial data and start the timer
-        fetchGameIssue().then(data => {
-            if (!data.data) {
-                console.error('No data received for initial game issue.');
-                return;
-            }
+            const updateTimer = () => {
+                fetchGameIssue()
+                .then(data => {
+                    if (!data.data) {
+                        console.error('No data received for game issue.');
+                        return;
+                    }
 
-            const initialIssueNumber = data.data.issueNumber;
-            const storedPrediction = localStorage.getItem('lastPrediction');
-            const lastPrediction = storedPrediction ? JSON.parse(storedPrediction) : {};
+                    const { endTime, intervalM, issueNumber } = data.data;
+                    if (!endTime || !intervalM) {
+                        console.error('Incomplete data received for game issue.');
+                        return;
+                    }
 
-            if (lastPrediction.issueNumber === initialIssueNumber) {
-                // Use stored prediction if the issue number matches
-                predictedNumberElement.textContent = `Bet on\n\n${lastPrediction.category}`;
-            } else {
-                // Generate new prediction if the issue number is different
-                updatePrediction(initialIssueNumber);
-            }
-        });
+                    const endDate = new Date(endTime);
+                    const now = new Date();
+                    const remainingTimeMs = endDate - now;
 
-        let timerInterval = setInterval(updateTimer, 1000);
+                    if (remainingTimeMs <= 0) {
+                        timerElement.textContent = "00:00";
+                        clearInterval(timerInterval);
 
-        // Add event listener to the refresh button
-        refreshButton.addEventListener('click', () => {
+                        setTimeout(() => {
+                            fetchGameIssue().then(data => {
+                                if (!data.data) {
+                                    console.error('No data received for new game issue.');
+                                    return;
+                                }
+
+                                const newIssueNumber = data.data.issueNumber;
+                                updatePrediction(newIssueNumber); 
+                            });
+                            timerInterval = setInterval(updateTimer, 1000);
+                        }, 3000);
+
+                    } else {
+                        const minutes = String(Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                        const seconds = String(Math.floor((remainingTimeMs % (1000 * 60)) / 1000)).padStart(2, '0');
+                        timerElement.textContent = `${minutes}:${seconds}`;
+                    }
+
+                    if (currentIssueNumber !== issueNumber) {
+                        updatePrediction(issueNumber); 
+                    }
+                })
+                .catch(error => console.error('Error fetching game issue:', error));
+            };
+
             fetchGameIssue().then(data => {
                 if (!data.data) {
-                    console.error('No data received for new game issue.');
+                    console.error('No data received for initial game issue.');
                     return;
                 }
 
-                const newIssueNumber = data.data.issueNumber;
-                updatePrediction(newIssueNumber); // Update prediction on refresh
+                const initialIssueNumber = data.data.issueNumber;
+                const storedPrediction = localStorage.getItem('lastPrediction');
+                const lastPrediction = storedPrediction ? JSON.parse(storedPrediction) : {};
+
+                if (lastPrediction.issueNumber === initialIssueNumber) {
+                    predictedNumberElement.textContent = `Bet on\n\n${lastPrediction.category}`;
+                } else {
+                    updatePrediction(initialIssueNumber);
+                }
+            });
+
+            timerInterval = setInterval(updateTimer, 1000);
+
+            refreshButton.addEventListener('click', () => {
+                fetchGameIssue().then(data => {
+                    if (!data.data) {
+                        console.error('No data received for new game issue.');
+                        return;
+                    }
+
+                    const newIssueNumber = data.data.issueNumber;
+                    updatePrediction(newIssueNumber);
+                });
             });
         });
-    });
-</script>
+    </script>
 </body>
                                                         </html>
