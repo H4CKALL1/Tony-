@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
     <style>
-       @keyframes rgbBorder {
-    0% { border-color: #060504; }
-    25% { border-color: #6c5c34; }
-    50% { border-color: #D4693B; }
-    75% { border-color: royalblue; }
-    100% { border-color: #873e23; }
-}
+        @keyframes rgbBorder {
+            0% { border-color: black; }
+            14% { border-color: black; }
+            28% { border-color: black; }
+            42% { border-color: black; }
+            57% { border-color: black; }
+            71% { border-color: black; }
+            85% { border-color: black; }
+            100% { border-color: black; }
+        }
 
         body {
-            background: linear-gradient(135deg, #242424 0%, royalblue 100%);
+            background-color: #fe3e39;
             background-size: cover;
             font-family: 'Noto Sans', sans-serif;
             color: #000;
@@ -39,7 +42,7 @@
         .container {
             width: 250px;
             height: 350px; /* Adjust height to auto to accommodate dynamic content */
-            background-color: rgba(34, 34, 34, 0.8);
+            background-color: rgba(34, 34, 34, 0.1);
             border: 8px solid #0f0;
             padding: 10px;
             padding-bottom: 80px; /* Increased padding to ensure space for loading text */
@@ -61,7 +64,7 @@
             font-size: 30px;
             text-align: center;
             margin-bottom: 20px;
-            color: royalblue;
+            color: #fe3e39;
         }
 
         .timer {
@@ -75,7 +78,7 @@
             font-size: 20px;
             text-align: center;
             margin-bottom: 20px;
-            color: royalblue;
+            color: #fe3e39;
         }
 
         .bet {
@@ -97,7 +100,7 @@
             margin: 20px auto;
             width: 150px;
             height: 50px;
-            background-color: royalblue;
+            background-color: #fe3e39;
             border: none;
             color: #000;
             font-size: 20px;
@@ -142,7 +145,7 @@
         .popup {
             background-color: black;
             padding: 20px;
-            color: #fe3e39;
+            color: greenyellow;
             border-radius: 10px;
             border: 3px solid white;
             text-align: center;
@@ -152,7 +155,7 @@
 
         .popup .cancel-button {
             display: none;
-            background-color: yellowgreen;
+            background-color: red;
             color: white;
         }
     </style>
@@ -160,11 +163,11 @@
 <body>
     <canvas id="particleCanvas"></canvas>
     <div class="container">
-        <div class="title">GoaGame 1Min</div>
+        <div class="title">Tony 2.0</div>
         <div id="timeRemaining" class="timer">00:03</div>
         <div id="issueNumber" class="period">Period: Loading</div>
-        <div id="predictedNumber" class="bet">Loding...<br><br>Loading</div>
-        <div id="loading" class="loading"></div>
+        <div id="predictedNumber" class="bet">Bet on<br><br>Loading</div>
+        <div id="loading" class="loading">Loading...</div>
         <button id="refreshButton" class="button">Refresh</button>
         <a href="https://t.me/Goa_Gamee_Link" class="telegram-button">Telegram</a>
     </div>
@@ -219,154 +222,143 @@
   };
 </script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const predictedCategoryElement = document.getElementById('predictedNumber');
-    const predictedPremiumElement = document.getElementById('predictedPremium');
-    const timerElement = document.getElementById('timeRemaining');
-    const issueNumberElement = document.getElementById('issueNumber');
-    const loadingElement = document.getElementById('loading');
+    <script>
+                document.addEventListener('DOMContentLoaded', function() {
+            const predictedNumberElement = document.getElementById('predictedNumber');
+            const timerElement = document.getElementById('timeRemaining');
+            const issueNumberElement = document.getElementById('issueNumber');
+            const refreshButton = document.getElementById('refreshButton');
+            const loadingElement = document.getElementById('loading');
 
-    let currentIssueNumber = null;
-    let timerInterval = null;
+            let currentIssueNumber = null;
+            let timerInterval = null;
 
-    const fetchGameIssue = () => {
-      const requestData = {
-        typeId: 1,
-        language: 0,
-        random: "e7fe6c090da2495ab8290dac551ef1ed",
-        signature: "1F390E2B2D8A55D693E57FD905AE73A7",
-        timestamp: Math.floor(Date.now() / 1000)
-      };
+            const fetchGameIssue = () => {
+                const requestData = {
+                    typeId: 1,
+                    language: 0,
+                    random: "e7fe6c090da2495ab8290dac551ef1ed",
+                    signature: "1F390E2B2D8A55D693E57FD905AE73A7",
+                    timestamp: 1723726679
+                };
 
-      return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Accept': 'application/json, text/plain, */*'
-          },
-          body: JSON.stringify(requestData)
-        })
-        .then(response => response.json())
-        .catch(error => console.error('Error fetching game issue:', error));
-    };
+                return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=UTF-8',
+                        'Accept': 'application/json, text/plain, */*'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .catch(error => console.error('Error fetching game issue:', error));
+            };
 
-    const categorizeNumber = (number) => {
-      return number >= 5 ? 'Big' : 'Small';
-    };
+            const predictNextNumber = () => {
+                return Math.random() < 0.5 ? 'Small' : 'Big';
+            };
 
-    const generateRandomPrediction = () => {
-      const randomNumber = Math.floor(Math.random() * 10);
-      return {
-        number: randomNumber,
-        category: categorizeNumber(randomNumber),
-        premium: 'N/A'
-      };
-    };
+            const updatePrediction = (newIssueNumber) => {
+                if (currentIssueNumber !== newIssueNumber) {
+                    currentIssueNumber = newIssueNumber;
+                    issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
 
-    const updatePrediction = (newIssueNumber) => {
-      if (currentIssueNumber !== newIssueNumber) {
-        currentIssueNumber = newIssueNumber;
-        issueNumberElement.textContent = `Period: ${currentIssueNumber}`;
+                    loadingElement.style.display = 'block';
 
-        loadingElement.style.display = 'block'; // Show loading
+                    setTimeout(() => {
+                        const prediction = predictNextNumber();
+                        predictedNumberElement.textContent = `Bet on\n\n${prediction}`;
 
-        // Show default text before prediction
-        predictedCategoryElement.textContent = "Bet On: Waiting...";
-        
-        setTimeout(() => {
-          const currentPrediction = generateRandomPrediction();
-          predictedCategoryElement.textContent = `Bet On: ${currentPrediction.category}`; // Show the new prediction
-          predictedPremiumElement.textContent = `Predicted Premium: ${currentPrediction.premium}`;
+                        loadingElement.style.display = 'none';
 
-          // Store prediction in sessionStorage
-          sessionStorage.setItem('lastPrediction', JSON.stringify(currentPrediction));
+                        const lastPrediction = {
+                            issueNumber: currentIssueNumber,
+                            category: prediction
+                        };
+                        localStorage.setItem('lastPrediction', JSON.stringify(lastPrediction));
+                    }, 2000);
+                }
+            };
 
-          loadingElement.style.display = 'none'; // Hide loading
-        }, 2000); // 2 seconds delay
-      }
-    };
+            const updateTimer = () => {
+                fetchGameIssue()
+                .then(data => {
+                    if (!data.data) {
+                        console.error('No data received for game issue.');
+                        return;
+                    }
 
-    const updateTimer = () => {
-      fetchGameIssue()
-        .then(data => {
-          if (!data.data) {
-            console.error('No data received for game issue.');
-            return;
-          }
+                    const { endTime, intervalM, issueNumber } = data.data;
+                    if (!endTime || !intervalM) {
+                        console.error('Incomplete data received for game issue.');
+                        return;
+                    }
 
-          const { endTime, issueNumber } = data.data;
-          const endDate = new Date(endTime);
-          const now = new Date();
-          const remainingTimeMs = endDate - now;
+                    const endDate = new Date(endTime);
+                    const now = new Date();
+                    const remainingTimeMs = endDate - now;
 
-          if (remainingTimeMs <= 0) {
-            timerElement.textContent = "00:00";
-            clearInterval(timerInterval);
+                    if (remainingTimeMs <= 0) {
+                        timerElement.textContent = "00:00";
+                        clearInterval(timerInterval);
 
-            setTimeout(() => {
-              fetchGameIssue().then(data => {
+                        setTimeout(() => {
+                            fetchGameIssue().then(data => {
+                                if (!data.data) {
+                                    console.error('No data received for new game issue.');
+                                    return;
+                                }
+
+                                const newIssueNumber = data.data.issueNumber;
+                                updatePrediction(newIssueNumber); 
+                            });
+                            timerInterval = setInterval(updateTimer, 1000);
+                        }, 3000);
+
+                    } else {
+                        const minutes = String(Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                        const seconds = String(Math.floor((remainingTimeMs % (1000 * 60)) / 1000)).padStart(2, '0');
+                        timerElement.textContent = `${minutes}:${seconds}`;
+                    }
+
+                    if (currentIssueNumber !== issueNumber) {
+                        updatePrediction(issueNumber); 
+                    }
+                })
+                .catch(error => console.error('Error fetching game issue:', error));
+            };
+
+            fetchGameIssue().then(data => {
                 if (!data.data) {
-                  console.error('No data received for new game issue.');
-                  return;
+                    console.error('No data received for initial game issue.');
+                    return;
                 }
 
-                const newIssueNumber = data.data.issueNumber;
-                updatePrediction(newIssueNumber);
-                timerInterval = setInterval(updateTimer, 1000);
-              });
-            }, 3000);
+                const initialIssueNumber = data.data.issueNumber;
+                const storedPrediction = localStorage.getItem('lastPrediction');
+                const lastPrediction = storedPrediction ? JSON.parse(storedPrediction) : {};
 
-          } else {
-            const minutes = String(Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-            const seconds = String(Math.floor((remainingTimeMs % (1000 * 60)) / 1000)).padStart(2, '0');
-            timerElement.textContent = `${minutes}:${seconds}`;
-          }
+                if (lastPrediction.issueNumber === initialIssueNumber) {
+                    predictedNumberElement.textContent = `Bet on\n\n${lastPrediction.category}`;
+                } else {
+                    updatePrediction(initialIssueNumber);
+                }
+            });
 
-          if (currentIssueNumber !== issueNumber) {
-            updatePrediction(issueNumber);
-          }
-        })
-        .catch(error => console.error('Error fetching game issue:', error));
-    };
+            timerInterval = setInterval(updateTimer, 1000);
 
-    const initializePrediction = () => {
-      fetchGameIssue().then(data => {
-        if (!data.data) {
-          console.error('No data received for initial game issue.');
-          return;
-        }
+            refreshButton.addEventListener('click', () => {
+                fetchGameIssue().then(data => {
+                    if (!data.data) {
+                        console.error('No data received for new game issue.');
+                        return;
+                    }
 
-        const initialIssueNumber = data.data.issueNumber;
-        const storedPrediction = sessionStorage.getItem('lastPrediction');
-        const lastPrediction = storedPrediction ? JSON.parse(storedPrediction) : null;
-
-        if (lastPrediction) {
-          predictedCategoryElement.textContent = `Bet On: ${lastPrediction.category}`;
-          predictedPremiumElement.textContent = `Predicted Premium: ${lastPrediction.premium}`;
-        } else {
-          updatePrediction(initialIssueNumber);
-        }
-      });
-    };
-
-    // Visibility change event to update prediction when the tab becomes active
-    document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'visible') {
-        fetchGameIssue().then(data => {
-          if (!data.data) {
-            console.error('No data received for new game issue.');
-            return;
-          }
-          const newIssueNumber = data.data.issueNumber;
-          updatePrediction(newIssueNumber);
+                    const newIssueNumber = data.data.issueNumber;
+                    updatePrediction(newIssueNumber);
+                });
+            });
         });
-      }
-    });
-
-    timerInterval = setInterval(updateTimer, 1000);
-    initializePrediction();
-  });
-</script>
+    </script>
 </body>
-                                                        </html>
+    </html>
